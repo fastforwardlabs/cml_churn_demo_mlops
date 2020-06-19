@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.11/lodash.min.js'></script>
+    <link rel="stylesheet" type="text/css" href="churn_vis.css">
+</head>
+
+<body>
+    <h1>Refractor</h1>
+    <div id="loader" style="clear: both;">
+        Loading Sample Data...
+        <br>
+        <img src="ajax-loader.gif">
+    </div>
+    <script>
+        d3.json('/sample_table', {
+                headers: {
+                    'Content-type': 'application/json'
+                }
+            })
+            .then(json => {
+                metadata = json
+                d3.select("#loader").attr("style", "display:none;")
+                json = json.sort(function (a, b) {
+                    return b.probability - a.probability
+                })
+
+                const color = d3.scaleQuantize()
+                    .domain([d3.min(_.map(_.map(json, d => {
+                        return d3.values(d.explanation)
+                    }), e => {
+                        return d3.min(e)
+                    })), d3.max(_.map(_.map(json, d => {
+                        return d3.values(d.explanation)
+                    }), e => {
+                        return d3.max(e)
+                    }))])
+                    .range([
+                        '#4393c3', '#92c5de', '#d1e5f0', '#f7f7f7', '#fddbc7', '#f4a582', '#d6604d'
+                    ]);
+
+                const prob_color = d3.scaleQuantize()
+                    .domain(d3.extent(_.map(json, function (d) {
+                        return d.probability
+                    })))
+                    .range([
+                        '#4393c3', '#92c5de', '#d1e5f0', '#f7f7f7', '#fddbc7', '#f4a582', '#d6604d'
+                    ]);
+
+                var body = d3.select("body");
+
+                var table = body.append("table");
+
+                var thead = table.append("thead");
+                var tbody = table.append("tbody");
+
+                var th = thead.append("tr")
+                    .selectAll("th")
+                    .data(_.concat(['id'], _.concat(["Probability"], d3.keys(json[0].data))))
+                    .enter()
+                    .append("th")
+                    .text(function (d) {
+                        return d;
+                    });
+
+
+                var tr = tbody.selectAll("tr")
+                    .data(json)
+                    .enter()
+                    .append("tr")
+                    .on("click", function (d) {
+                        local_url = new URL(window.location.origin + "/flask/single_view.html")
+                        _.each(d.data, function (values, keys) {
+                            local_url.searchParams.set(keys, values)
+                        })
+                        return window.location = local_url.href;
+                    });
+
+                var td = tr.selectAll("td")
+                    .data(function (d, i) {
+                        return _.concat({
+                            key: "id",
+                            values: {
+                                value: d.id
+                            }
+                        }, _.concat({
+                                key: "probability",
+                                values: {
+                                    value: d.probability
+                                }
+                            },
+                            _.map(d3.entries(d.data), function (e) {
+                                return {
+                                    key: e.key,
+                                    values: {
+                                        value: e.value,
+                                        prediction: d.explanation[e.key]
+                                    }
+                                }
+                            })))
+                    })
+                    .enter()
+                    .append("td")
+                    .text(
+                        function (e, i) {
+                            return String(e.values.value).substring(0, 5);
+                        })
+                    .attr("style", function (e) {
+
+                        if (e.values.prediction !== undefined) {
+                            return "background:" + color(e.values.prediction);
+                        }
+                        if (e.key === "probability") {
+                            return "background:" + prob_color(e.values.value);
+                        }
+                    })
+
+            });
+    </script>
+
+</body>

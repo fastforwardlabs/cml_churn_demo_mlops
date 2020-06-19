@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.11/lodash.min.js'></script>
+    <link rel="stylesheet" type="text/css" href="churn_vis.css">
+</head>
+
+<body>
+    <h1>Single Prediction View</h1>
+    <div style='clear:both;' class="churn_div">
+        <div style='float:left;padding-left:20px'>Churn Probability</div>
+        <div id='pred_value'></div>
+
+    </div>
+    <div id='features' style='clear:both;'></div>
+    <script>
+        const accessKey = "m2139vti3f29jqeavtb8y73op4yf7ey1";
+        in_url = new URL(window.location.href)
+        out_url = new URL(window.location.origin + window.location.pathname)
+
+        params = {}
+        for (let p of in_url.searchParams.entries()) {
+            params[p[0]] = p[1]
+        }
+        var features_numeric = d3.json('/stats').then(json => {
+            return json;
+
+        });
+        var features_categorical = d3.json('/categories').then(json => {
+            return json
+        });
+        
+        const prob_color = d3.scaleQuantize()
+                    .domain([-0.3,0.3])
+                    .range([
+                        '#4393c3', '#92c5de', '#d1e5f0', '#f7f7f7', '#fddbc7', '#f4a582', '#d6604d'
+                    ]);
+        const color = d3.scaleQuantize()
+                    .domain([0,1])
+                    .range([
+                        '#4393c3', '#92c5de', '#d1e5f0', '#f7f7f7', '#fddbc7', '#f4a582', '#d6604d'
+                    ]);
+        var dataset = d3.json(
+                //window.location.origin.substr(0,window.location.origin.indexOf(":")+1) + "//" + window.location.origin.substr(window.location.origin.indexOf(".")+1) + '/api/altus-ds-1/models/call-model', {
+                window.location.origin.substr(0,window.location.origin.indexOf(":")+1) + "//" + "modelservice." + window.location.origin.substr(window.location.origin.indexOf(".")+1) + '/model', {
+                method: 'POST',
+                body: '{"accessKey":"' + accessKey + '","request":' + JSON.stringify(params) +
+                    '}',
+                headers: {
+                    'Content-type': 'application/json'
+                }
+            })
+            .then(json => {
+                return json
+            });
+
+        Promise.all([features_numeric, features_categorical, dataset]).then(values => {
+            console.log(values[2])
+            _.each(values[2].response.prediction.data, function (value, key) {
+                out_url.searchParams.set(key, value)
+            })
+            //metadata = values;
+            var features_all = _.merge(values[0], values[1]);
+            var merged_data = _.map(d3.entries(values[2].response.prediction.data), function (e) {
+                return _.concat([{
+                    key: e.key
+                }, {
+                    value: e.value
+                }, {
+                    explanation: values[2].response.prediction.explanation[e.key]
+                }], d3.entries(features_all[e.key]))
+            });
+            merged_data = _.map(merged_data, function (d) {
+                return _.filter(d, function (e) {
+                    return ((e.key === "median") || (e.key === "std")) ? 0 : 1
+                })
+            })
+
+            var prediction_value = d3.select("#pred_value")
+                .text(values[2].response.prediction.probability.toFixed(3))
+                .attr("style","background:" + color(values[2].response.prediction.probability) +";padding:10px;");
+
+            var main_divs = d3.select("#features").selectAll(".main_div")
+                .data(merged_data)
+                .enter()
+                .append("div")
+                .attr("id", function (d) {
+                    return d[0].key
+                })
+                .attr("class", "main_div");
+
+
+            var little_divs = main_divs.selectAll(".inner_div")
+                .data(function (h) {
+                    return h
+                })
+                .enter()
+                .append("div")
+                .attr("class", "inner_div")
+                .text(function (f, i) {
+
+                    if (i === 0) {
+                        return f.key
+                    } else if (i === 1) {
+                        return f.value
+                    } else if (i === 2) {
+                        if (f.explanation !== undefined) {
+                            return f.explanation.toFixed(2);
+                        } else {
+                            return 0
+                        }
+                    } else {
+
+                        if (isNaN(parseInt(f.key))) {
+                            return f.key + " " + f.value.toFixed(2);
+                        } else {
+                            return f.value;
+                        }
+                    }
+
+
+                })
+                .on("click", function (f, i) {
+
+                    if (i >= 3) {
+                        if (!isNaN(parseInt(f.key))) {
+                            local_url = new URL(out_url)
+                            local_url.searchParams.set(this.parentNode.id, f.value)
+                            return window.location = local_url.href;
+                        }
+                    }
+                })
+                .attr("style", function (f, i) {
+                    if (i === 0) {
+                        return "width:100px"
+                    } else if (i === 1) {
+                        return "width:100px;border: 1px solid #fff; background:#eee;";
+                    } else if (i === 2) {
+                      if (f.explanation !== undefined) {
+                        return "width:30px;background:" + prob_color(f.explanation) + ";";
+                      } else {
+                        return "width:30px;";
+                      }
+                      
+                    } else {
+                        if (!isNaN(parseInt(f.key))) {
+                            return "cursor: pointer; border: 1px solid #ccc; background:#ddd;"
+                        }
+                    }
+
+
+                })
+
+            main_divs.insert("div").html(function (d) {
+                    if (d[3].key === "0") {
+                        return ""
+                    } else {
+                        return "<input type='text'>"
+                    }
+
+                }).attr("class", "input_div")
+                .append("div")
+                .attr("class", "submit_div")
+                .html(function (d) {
+                    if (d[3].key === "0") {
+                        return ""
+                    } else {
+                        return "<input type='submit' value='Submit'>"
+                    }
+                })
+                .on("click", function (d) {
+                        local_url = new URL(out_url)
+                        if (!isNaN(parseInt(d3.select(this.parentNode).select("input").property("value")))) {
+                            local_url.searchParams.set(this.parentNode.parentNode.id, d3.select(this.parentNode)
+                                .select("input").property("value"))
+                            return window.location = local_url.href;
+                        }
+                    }
+
+                )
+        }).catch(err => alert("Disable Model Authentication First"));
+    </script>
+</body>
