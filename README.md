@@ -1,4 +1,4 @@
-# Churn Prediction Project Prototype
+# Churn Prediction Prototype
 This project is a Cloudera Machine Learning 
 ([CML](https://www.cloudera.com/products/machine-learning.html)) **Applied Machine Learning 
 Project Prototype**. It has all the code and data needed to deploy an end-to-end machine 
@@ -76,7 +76,7 @@ Open the file `0_bootstrap.py` in a normal workbench python3 session. You only n
 1 CPU / 2 GB instance. Then **Run > Run All Lines**
 
 ### 1 Ingest Data
-This script will read in the data csv from the file uploaded to the s3 bucket setup 
+This script will read in the data csv from the file uploaded to the object store (s3/adls) setup 
 during the bootstrap and create a managed table in Hive. This is all done using Spark.
 
 Open `1_data_ingest.py` in a Workbench session: python3, 1 CPU, 2 GB. Run the file.
