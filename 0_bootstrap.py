@@ -44,7 +44,7 @@ except:
   root = tree.getroot()
   for prop in root.findall('property'):
     if prop.find('name').text == "hive.metastore.warehouse.dir":
-      if (prop.find('value').text == "/"):
+      if (prop.find('value').text[0] == "/"):
         storage = "/user/" + cml.get_user({})["username"]
       else:  
         storage = prop.find('value').text.split("/")[0] + "//" + prop.find('value').text.split("/")[2]
