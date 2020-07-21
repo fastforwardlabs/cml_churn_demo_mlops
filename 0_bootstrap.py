@@ -40,11 +40,13 @@ cml = CMLBootstrap(HOST, USERNAME, API_KEY, PROJECT_NAME)
 try : 
   storage=os.environ["STORAGE"]
 except:
-  tree = ET.parse('/etc/hadoop/conf/hive-site.xml')
+  tree = ET.parse('/var/lib/cdsw/client-config/hive-conf/hive-site.xml')
   root = tree.getroot()
-    
   for prop in root.findall('property'):
     if prop.find('name').text == "hive.metastore.warehouse.dir":
+      if (prop.find('value').text == "/"):
+        storage = "/user/" + cml.get_user({})["username"]
+      else:  
         storage = prop.find('value').text.split("/")[0] + "//" + prop.find('value').text.split("/")[2]
   storage_environment_params = {"STORAGE":storage}
   storage_environment = cml.create_environment_variable(storage_environment_params)
