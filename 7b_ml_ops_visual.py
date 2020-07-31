@@ -44,6 +44,7 @@ import numpy as np
 from sklearn.metrics import classification_report
 from cmlbootstrap import CMLBootstrap
 import seaborn as sns
+import sqlite3
 
 
 ## Set the model ID
@@ -73,6 +74,11 @@ model_metrics = cdsw.read_metrics(model_crn=Model_CRN,model_deployment_crn=Deplo
 # This is a handy way to unravel the dict into a big pandas dataframe.
 metrics_df = pd.io.json.json_normalize(model_metrics["metrics"])
 metrics_df.tail().T
+
+# Write the data to SQL lite for Viz Apps
+conn = sqlite3.connect('model_metrics.db')
+metrics_df.to_sql(name='model_metrics', con=conn)
+pd.read_sql('select * from model_metrics limit 5', conn)
 
 # Do some conversions & calculations
 metrics_df['startTimeStampMs'] = pd.to_datetime(metrics_df['startTimeStampMs'], unit='ms')
