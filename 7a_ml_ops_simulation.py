@@ -111,7 +111,7 @@ import copy
 # Get the model id from the model you deployed in step 5. These are unique to each 
 # model on CML.
 
-model_id = "92"
+model_id = "76"
 
 # Grab the data from Hive.
 from pyspark.sql import SparkSession

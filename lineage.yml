@@ -1,4 +1,4 @@
-"Model Explainer 18062020054750":
+"Model Explainer 31072020084145":
   hive_table_qualified_names:                # this is a predefined key to link to training data
     - "default.telco_churn@cm"               # the qualifiedName of the hive_table object representing                
   metadata:                                  # this is a predefined key for additional metadata
