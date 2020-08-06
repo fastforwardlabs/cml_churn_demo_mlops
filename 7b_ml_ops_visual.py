@@ -79,7 +79,6 @@ metrics_df.tail().T
 if not(os.path.exists("model_metrics.db")):
   conn = sqlite3.connect('model_metrics.db')
   metrics_df.to_sql(name='model_metrics', con=conn)
-  pd.read_sql('select * from model_metrics limit 5', conn)
 
 # Do some conversions & calculations
 metrics_df['startTimeStampMs'] = pd.to_datetime(metrics_df['startTimeStampMs'], unit='ms')
