@@ -1,0 +1,95 @@
+name: ML Churn Demo
+author: Cloudera Engineer
+date: "some date"
+api_version: 1
+
+environment:
+  AWS_ACCESS_KEY:
+    default: "SUPER AWESOME AWS KEY"
+    description: "Access Key ID for accessing S3 bucket"
+    prompt_user: true
+  AWS_SECRET_KEY:
+    default: "THE SUPER DUPER SECRETE"
+    description: "Secret Access Key for accessing S3 bucket"
+    prompt_user: true
+  HADOOP_DATA_SOURCE:
+    default: "WE DONT HAVE HADOOP ON THIS CLUSTER"
+    description: "S3 URL to large data set"
+    prompt_user: true
+  MODEL_REPLICAS:
+    default: "3"
+    description: "Number of model replicas, 3 is standard for redundancy"
+    prompt_user: false
+  TASK_TYPE:
+    default: NOT_OVERRIDEN
+    prompt_user: false
+
+tasks:
+  - type: create_job
+    name: install_deps
+    script: 0_bootstrap.py
+    arguments: None
+    short_summary: Job to install dependencies and download training data.
+    environment:
+      TASK_TYPE: CREATE/RUN_JOB
+    kernel: python3
+
+  - type: run_job
+    name: install_deps
+    short_summary: Running install dependencies training job.
+    long_summary: >-
+      Running the job to install dependencies.
+
+  - type: create_job
+    name: train_model
+    script: 4_train_models.py
+    arguments: None
+    short_summary: Job to train models.
+    environment:
+      TASK_TYPE: CREATE/RUN_JOB
+    kernel: python3
+
+  - type: run_job
+    name: train_model
+    short_summary: Running model training job.
+    long_summary: >-
+      Running the job to train models.
+
+  - type: create_model
+    name: telco_churn_model
+    description: This model predicts churn
+    short_summary: Create the churn model prediction
+    default_resources:
+      cpu_millicores: 1000
+      memory_mb: 2048
+    default_replication_policy:
+      type: fixed
+      num_replicas: 1
+    auth_enabled: true
+
+  - type: build_model
+    name: telco_churn_model
+    comment: Build churn model
+    examples:
+      - request: '{"StreamingTV":"No","MonthlyCharges":70.35,"PhoneService":"No","PaperlessBilling":"No","Partner":"No","OnlineBackup":"No","gender":"Female","Contract":"Month-to-month","TotalCharges":1397.475,"StreamingMovies":"No","DeviceProtection":"No","PaymentMethod":"Bank transfer (automatic)","tenure":29,"Dependents":"No","OnlineSecurity":"No","MultipleLines":"No","InternetService":"DSL","SeniorCitizen":"No","TechSupport":"No"}'
+        response: ""
+    target_file_path: 5_model_serve_explainer.py
+    target_function_name: explain
+    kernel: python3
+    environment:
+      TASK_TYPE: CREATE/BUILD/DEPLOY_MODEL
+
+  - type: deploy_model
+    name: telco_churn_model
+    cpu_millicores: 1500
+    nvidia_gpus: 0
+    environment:
+      TASK_TYPE: CREATE/BUILD/DEPLOY_MODEL
+
+  - type: start_application
+    name: Application serve Churn  front app UI
+    subdomain: churn
+    script: 6_application.py
+    environment:
+      TASK_TYPE: START_APPLICATION
+    kernel: python3
