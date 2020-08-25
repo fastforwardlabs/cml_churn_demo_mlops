@@ -1,6 +1,7 @@
 # Run this file to auto deploy the model, run a job, and deploy the application
 
 # Install the requirements
+!pip3 install -r requirements.txt
 import subprocess
 import datetime
 import xml.etree.ElementTree as ET
@@ -10,7 +11,7 @@ import time
 import os
 from IPython.display import Javascript, HTML
 from cmlbootstrap import CMLBootstrap
-!pip3 install - r requirements.txt
+
 
 # Create the directories and upload data
 
