@@ -70,121 +70,120 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import *
 
 
-try:
-    spark = SparkSession\
-        .builder\
-        .appName("PythonSQL")\
-        .master("local[*]")\
-        .getOrCreate()
 
-    # **Note:**
-    # Our file isn't big, so running it in Spark local mode is fine but you can add the following config
-    # if you want to run Spark on the kubernetes cluster
-    #
-    # > .config("spark.yarn.access.hadoopFileSystems",os.getenv['STORAGE'])\
-    #
-    # and remove `.master("local[*]")\`
-    #
+spark = SparkSession\
+    .builder\
+    .appName("PythonSQL")\
+    .master("local[*]")\
+    .getOrCreate()
 
-    # Since we know the data already, we can add schema upfront. This is good practice as Spark will
-    # read *all* the Data if you try infer the schema.
+# **Note:**
+# Our file isn't big, so running it in Spark local mode is fine but you can add the following config
+# if you want to run Spark on the kubernetes cluster
+#
+# > .config("spark.yarn.access.hadoopFileSystems",os.getenv['STORAGE'])\
+#
+# and remove `.master("local[*]")\`
+#
 
-    schema = StructType(
-        [
-            StructField("customerID", StringType(), True),
-            StructField("gender", StringType(), True),
-            StructField("SeniorCitizen", StringType(), True),
-            StructField("Partner", StringType(), True),
-            StructField("Dependents", StringType(), True),
-            StructField("tenure", DoubleType(), True),
-            StructField("PhoneService", StringType(), True),
-            StructField("MultipleLines", StringType(), True),
-            StructField("InternetService", StringType(), True),
-            StructField("OnlineSecurity", StringType(), True),
-            StructField("OnlineBackup", StringType(), True),
-            StructField("DeviceProtection", StringType(), True),
-            StructField("TechSupport", StringType(), True),
-            StructField("StreamingTV", StringType(), True),
-            StructField("StreamingMovies", StringType(), True),
-            StructField("Contract", StringType(), True),
-            StructField("PaperlessBilling", StringType(), True),
-            StructField("PaymentMethod", StringType(), True),
-            StructField("MonthlyCharges", DoubleType(), True),
-            StructField("TotalCharges", DoubleType(), True),
-            StructField("Churn", StringType(), True)
-        ]
-    )
+# Since we know the data already, we can add schema upfront. This is good practice as Spark will
+# read *all* the Data if you try infer the schema.
 
-    # Now we can read in the data from Cloud Storage into Spark...
+schema = StructType(
+    [
+        StructField("customerID", StringType(), True),
+        StructField("gender", StringType(), True),
+        StructField("SeniorCitizen", StringType(), True),
+        StructField("Partner", StringType(), True),
+        StructField("Dependents", StringType(), True),
+        StructField("tenure", DoubleType(), True),
+        StructField("PhoneService", StringType(), True),
+        StructField("MultipleLines", StringType(), True),
+        StructField("InternetService", StringType(), True),
+        StructField("OnlineSecurity", StringType(), True),
+        StructField("OnlineBackup", StringType(), True),
+        StructField("DeviceProtection", StringType(), True),
+        StructField("TechSupport", StringType(), True),
+        StructField("StreamingTV", StringType(), True),
+        StructField("StreamingMovies", StringType(), True),
+        StructField("Contract", StringType(), True),
+        StructField("PaperlessBilling", StringType(), True),
+        StructField("PaymentMethod", StringType(), True),
+        StructField("MonthlyCharges", DoubleType(), True),
+        StructField("TotalCharges", DoubleType(), True),
+        StructField("Churn", StringType(), True)
+    ]
+)
 
-    storage = os.environ['STORAGE']
+# Now we can read in the data from Cloud Storage into Spark...
 
-    telco_data = spark.read.csv(
-        "{}/datalake/data/churn/WA_Fn-UseC_-Telco-Customer-Churn-.csv".format(
-            storage),
-        header=True,
-        schema=schema,
-        sep=',',
-        nullValue='NA'
-    )
+storage = os.environ['STORAGE']
 
-    # ...and inspect the data.
+telco_data = spark.read.csv(
+    "{}/datalake/data/churn/WA_Fn-UseC_-Telco-Customer-Churn-.csv".format(
+        storage),
+    header=True,
+    schema=schema,
+    sep=',',
+    nullValue='NA'
+)
 
-    telco_data.show()
+# ...and inspect the data.
 
-    telco_data.printSchema()
+telco_data.show()
 
-    # Now we can store the Spark DataFrame as a file in the local CML file system
-    # *and* as a table in Hive used by the other parts of the project.
+telco_data.printSchema()
 
-    telco_data.coalesce(1).write.csv(
-        "file:/home/cdsw/raw/telco-data/",
-        mode='overwrite',
-        header=True
-    )
+# Now we can store the Spark DataFrame as a file in the local CML file system
+# *and* as a table in Hive used by the other parts of the project.
 
-    spark.sql("show databases").show()
+telco_data.coalesce(1).write.csv(
+    "file:/home/cdsw/raw/telco-data/",
+    mode='overwrite',
+    header=True
+)
 
-    spark.sql("show tables in default").show()
+spark.sql("show databases").show()
 
-    # Create the Hive table
-    # This is here to create the table in Hive used be the other parts of the project, if it
-    # does not already exist.
+spark.sql("show tables in default").show()
 
-    if ('telco_churn' not in list(spark.sql("show tables in default").toPandas()['tableName'])):
-        print("creating the telco_churn database")
-        telco_data\
-            .write.format("parquet")\
-            .mode("overwrite")\
-            .saveAsTable(
-                'default.telco_churn'
-            )
+# Create the Hive table
+# This is here to create the table in Hive used be the other parts of the project, if it
+# does not already exist.
 
-    # Show the data in the hive table
-    spark.sql("select * from default.telco_churn").show()
+if ('telco_churn' not in list(spark.sql("show tables in default").toPandas()['tableName'])):
+    print("creating the telco_churn database")
+    telco_data\
+        .write.format("parquet")\
+        .mode("overwrite")\
+        .saveAsTable(
+            'default.telco_churn'
+        )
 
-    # To get more detailed information about the hive table you can run this:
-    spark.sql("describe formatted default.telco_churn").toPandas()
+# Show the data in the hive table
+spark.sql("select * from default.telco_churn").show()
 
-    # Other ways to access data
+# To get more detailed information about the hive table you can run this:
+spark.sql("describe formatted default.telco_churn").toPandas()
 
-    # To access data from other locations, refer to the
-    # [CML documentation](https://docs.cloudera.com/machine-learning/cloud/import-data/index.html).
+# Other ways to access data
 
-    # Scheduled Jobs
-    #
-    # One of the features of CML is the ability to schedule code to run at regular intervals,
-    # similar to cron jobs. This is useful for **data pipelines**, **ETL**, and **regular reporting**
-    # among other use cases. If new data files are created regularly, e.g. hourly log files, you could
-    # schedule a Job to run a data loading script with code like the above.
+# To access data from other locations, refer to the
+# [CML documentation](https://docs.cloudera.com/machine-learning/cloud/import-data/index.html).
 
-    # > Any script [can be scheduled as a Job](https://docs.cloudera.com/machine-learning/cloud/jobs-pipelines/topics/ml-creating-a-job.html).
-    # > You can create a Job with specified command line arguments or environment variables.
-    # > Jobs can be triggered by the completion of other jobs, forming a
-    # > [Pipeline](https://docs.cloudera.com/machine-learning/cloud/jobs-pipelines/topics/ml-creating-a-pipeline.html)
-    # > You can configure the job to email individuals with an attachment, e.g. a csv report which your
-    # > script saves at: `/home/cdsw/job1/output.csv`.
+# Scheduled Jobs
+#
+# One of the features of CML is the ability to schedule code to run at regular intervals,
+# similar to cron jobs. This is useful for **data pipelines**, **ETL**, and **regular reporting**
+# among other use cases. If new data files are created regularly, e.g. hourly log files, you could
+# schedule a Job to run a data loading script with code like the above.
 
-    # Try running this script `1_data_ingest.py` for use in such a Job.
-except:
-    print("Error connecting to Spark.")
+# > Any script [can be scheduled as a Job](https://docs.cloudera.com/machine-learning/cloud/jobs-pipelines/topics/ml-creating-a-job.html).
+# > You can create a Job with specified command line arguments or environment variables.
+# > Jobs can be triggered by the completion of other jobs, forming a
+# > [Pipeline](https://docs.cloudera.com/machine-learning/cloud/jobs-pipelines/topics/ml-creating-a-pipeline.html)
+# > You can configure the job to email individuals with an attachment, e.g. a csv report which your
+# > script saves at: `/home/cdsw/job1/output.csv`.
+
+# Try running this script `1_data_ingest.py` for use in such a Job.
+
