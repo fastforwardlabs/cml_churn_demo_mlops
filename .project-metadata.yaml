@@ -1,9 +1,12 @@
 name: ML Churn Demo
+description: Prototype to demonstrate building a churn model on CML
 author: Cloudera Engineer
-date: "some date"
+specification_version: 1.0
+prototype_version: 1.0
+date: "2020-09-29"
 api_version: 1
 
-environment:
+environment_variables:
   AWS_ACCESS_KEY:
     default: "SUPER AWESOME AWS KEY"
     description: "Access Key ID for accessing S3 bucket"
@@ -63,14 +66,14 @@ tasks:
     description: This model api endpoint predicts churn
     short_summary: Create the churn model prediction api endpoint
     access_key_environment_variable: SHTM_ACCESS_KEY
-    default_resources:
-      cpu: 1
-      memory: 2
+    # default_resources:
+    #   cpu: 1
+    #   memory: 2
     default_replication_policy:
       type: fixed
       num_replicas: 1
-    auth_enabled: false
 
+    # auth_enabled: false
   - type: build_model
     name: Build Telco Churn Model Endpoint
     entity_label: telco_churn_model
@@ -93,7 +96,7 @@ tasks:
       TASK_TYPE: CREATE/BUILD/DEPLOY_MODEL
 
   - type: start_application
-    name: Application serve Churn  front app UI
+    name: Application to serve Churn  front app UI
     subdomain: churn
     script: 6_application.py
     environment_variables:
