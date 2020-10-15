@@ -8,15 +8,15 @@ api_version: 1
 
 environment_variables:
   AWS_ACCESS_KEY:
-    default: "SUPER AWESOME AWS KEY"
+    default: "AWS ACCESS KEY"
     description: "Access Key ID for accessing S3 bucket"
     prompt_user: true
   AWS_SECRET_KEY:
-    default: "THE SUPER DUPER SECRETE"
+    default: "AWS SECRET KEY"
     description: "Secret Access Key for accessing S3 bucket"
     prompt_user: true
   HADOOP_DATA_SOURCE:
-    default: "WE DONT HAVE HADOOP ON THIS CLUSTER"
+    default: "S3 URL FOR DATASET"
     description: "S3 URL to large data set"
     prompt_user: true
   MODEL_REPLICAS:
