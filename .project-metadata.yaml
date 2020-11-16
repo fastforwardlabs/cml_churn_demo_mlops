@@ -1,19 +1,22 @@
 name: ML Churn Demo
+description: Prototype to demonstrate building a churn model on CML
 author: Cloudera Engineer
-date: "some date"
+specification_version: 1.0
+prototype_version: 1.0
+date: "2020-09-29"
 api_version: 1
 
-environment:
+environment_variables:
   AWS_ACCESS_KEY:
-    default: "SUPER AWESOME AWS KEY"
+    default: "AWS ACCESS KEY"
     description: "Access Key ID for accessing S3 bucket"
     prompt_user: true
   AWS_SECRET_KEY:
-    default: "THE SUPER DUPER SECRETE"
+    default: "AWS SECRET KEY"
     description: "Secret Access Key for accessing S3 bucket"
     prompt_user: true
   HADOOP_DATA_SOURCE:
-    default: "WE DONT HAVE HADOOP ON THIS CLUSTER"
+    default: "S3 URL FOR DATASET"
     description: "S3 URL to large data set"
     prompt_user: true
   MODEL_REPLICAS:
@@ -26,7 +29,8 @@ environment:
 
 tasks:
   - type: create_job
-    name: install_deps
+    name: Install dependencies
+    entity_label: install_deps
     script: 0_bootstrap.py
     arguments: None
     short_summary: Job to install dependencies and download training data.
@@ -35,13 +39,14 @@ tasks:
     kernel: python3
 
   - type: run_job
-    name: install_deps
+    entity_label: install_deps
     short_summary: Running install dependencies training job.
     long_summary: >-
       Running the job to install dependencies.
 
   - type: create_job
-    name: train_model
+    name: Train Churn Model
+    entity_label: train_model
     script: 4_train_models.py
     arguments: None
     short_summary: Job to train models.
@@ -50,25 +55,28 @@ tasks:
     kernel: python3
 
   - type: run_job
-    name: train_model
-    short_summary: Running model training job.
+    entity_label: train_model
+    short_summary: Run model training job.
     long_summary: >-
       Running the job to train models.
 
   - type: create_model
-    name: telco_churn_model
-    description: This model predicts churn
-    short_summary: Create the churn model prediction
-    default_resources:
-      cpu_millicores: 1000
-      memory_mb: 2048
+    name: Create Churn Model API Endpoint
+    entity_label: telco_churn_model
+    description: This model api endpoint predicts churn
+    short_summary: Create the churn model prediction api endpoint
+    access_key_environment_variable: SHTM_ACCESS_KEY
+    # default_resources:
+    #   cpu: 1
+    #   memory: 2
     default_replication_policy:
       type: fixed
       num_replicas: 1
-    auth_enabled: true
 
+    # auth_enabled: false
   - type: build_model
-    name: telco_churn_model
+    name: Build Telco Churn Model Endpoint
+    entity_label: telco_churn_model
     comment: Build churn model
     examples:
       - request: '{"StreamingTV":"No","MonthlyCharges":70.35,"PhoneService":"No","PaperlessBilling":"No","Partner":"No","OnlineBackup":"No","gender":"Female","Contract":"Month-to-month","TotalCharges":1397.475,"StreamingMovies":"No","DeviceProtection":"No","PaymentMethod":"Bank transfer (automatic)","tenure":29,"Dependents":"No","OnlineSecurity":"No","MultipleLines":"No","InternetService":"DSL","SeniorCitizen":"No","TechSupport":"No"}'
@@ -76,20 +84,21 @@ tasks:
     target_file_path: 5_model_serve_explainer.py
     target_function_name: explain
     kernel: python3
-    environment:
+    environment_variables:
       TASK_TYPE: CREATE/BUILD/DEPLOY_MODEL
 
   - type: deploy_model
     name: telco_churn_model
-    cpu_millicores: 1500
-    nvidia_gpus: 0
-    environment:
+    entity_label: telco_churn_model
+    cpu: 1
+    gpu: 0
+    environment_variables:
       TASK_TYPE: CREATE/BUILD/DEPLOY_MODEL
 
   - type: start_application
-    name: Application serve Churn  front app UI
+    name: Application to serve Churn  front app UI
     subdomain: churn
     script: 6_application.py
-    environment:
+    environment_variables:
       TASK_TYPE: START_APPLICATION
     kernel: python3
