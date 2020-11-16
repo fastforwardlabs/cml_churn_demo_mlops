@@ -118,9 +118,10 @@ log.setLevel(logging.ERROR)
 
 # Since we have access in an environment variable, we want to write it to our UI
 # Change the line in the flask/single_view.html file.
-access_key = os.environ.get('SHTM_ACCESS_KEY', "")
-subprocess.call(["sed", "-i",  's/const\saccessKey.*/const accessKey = "' +
-                 access_key + '";/', "/home/cdsw/flask/single_view.html"])
+if os.environ.get('SHTM_ACCESS_KEY') != None:
+  access_key = os.environ.get('SHTM_ACCESS_KEY', "")
+  subprocess.call(["sed", "-i",  's/const\saccessKey.*/const accessKey = "' +
+                   access_key + '";/', "/home/cdsw/flask/single_view.html"])
 
 
 # Load the explained model
