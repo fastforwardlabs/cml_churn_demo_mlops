@@ -85,7 +85,7 @@ Open `1_data_ingest.py` in a Workbench session: python3, 1 CPU, 2 GB. Run the fi
 This is a Jupyter Notebook that does some basic data exploration and visualistaion. It 
 is to show how this would be part of the data science workflow.
 
-![data](https://raw.githubusercontent.com/fletchjeff/cml_churn_demo_mlops/master/images/data.png)
+![data](https://raw.githubusercontent.com/fastforwardlabs/cml_churn_demo_mlops/master/images/data.png)
 
 Open a Jupyter Notebook session (rather than a work bench): python3, 1 CPU, 2 GB and 
 open the `2_data_exploration.ipynb` file. 
