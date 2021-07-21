@@ -53,8 +53,8 @@ except:
   os.environ["STORAGE"] = storage
 
 # Upload the data to the cloud storage
-!hdfs dfs -mkdir -p $STORAGE/datalake
-!hdfs dfs -mkdir -p $STORAGE/datalake/data
-!hdfs dfs -mkdir -p $STORAGE/datalake/data/churn
-!hdfs dfs -copyFromLocal /home/cdsw/raw/WA_Fn-UseC_-Telco-Customer-Churn-.csv $STORAGE/datalake/data/churn/WA_Fn-UseC_-Telco-Customer-Churn-.csv
+!hadoop fs -mkdir -p $STORAGE/datalake
+!hadoop fs -mkdir -p $STORAGE/datalake/data
+!hadoop fs -mkdir -p $STORAGE/datalake/data/churn
+!hadoop fs -copyFromLocal /home/cdsw/raw/WA_Fn-UseC_-Telco-Customer-Churn-.csv $STORAGE/datalake/data/churn/WA_Fn-UseC_-Telco-Customer-Churn-.csv
 
