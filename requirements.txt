@@ -1,4 +1,5 @@
-git+https://github.com/fastforwardlabs/cmlbootstrap#egg=cmlbootstrap
+git+https://github.com/fletchjeff/cmlbootstrap#egg=cmlbootstrap
+seaborn==0.9.0
 dill==0.3.1.1 
 lime==0.1.1.36 
 scikit-learn==0.21.3 

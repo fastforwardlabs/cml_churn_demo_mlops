@@ -51,7 +51,7 @@ git repo in the `raw` folder.
 ***Deploy the Complete Project***
 
 If you just wish build the project artifacts without going through each step manually, 
-run the `8_build_projet.py` file in a python3 session. Again a 1 vCPU / 2 GiB instance 
+run the `9_build_projet.py` file in a python3 session. Again a 1 vCPU / 2 GiB instance 
 will be suffient. This script will: 
 * run the bootstrap
 * then create the Hive Table and import the data
