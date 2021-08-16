@@ -64,7 +64,9 @@ for ids in cml.get_runtimes()["runtimes"]:
   if ids["kernel"] == "Python 3.7" and ids["edition"] == "Standard" and ids["shortVersion"] == "2021.06" and ids["editor"] == "Workbench":
     runtime_id = ids["id"]
     
-
+#Get runtime addon numbers
+addon_val = cml.get_runtimes_addons()[0]['identifier'] 
+    
 # Create Job
 create_jobs_params = {"name": "Train Model",
                       "type": "manual",
@@ -95,7 +97,7 @@ create_jobs_params = {"name": "Train Model",
 
 if os.getenv("ML_RUNTIME_EDITION") != None:
   create_jobs_params["runtime_id"] = runtime_id
-  create_jobs_params["addons"] = [1,2]
+  create_jobs_params["addons"] = [addon_val-1,addon_val]
   create_jobs_params["kernel"] = ""
   
   
@@ -142,7 +144,7 @@ example_model_input = {"StreamingTV": "No", "MonthlyCharges": 70.35, "PhoneServi
 
 create_model_params = {
     "projectId": project_id,
-    "name": "Model Explainer",
+    "name": "Model Explainer 2",
     "description": "Explain a given model prediction",
     "visibility": "private",
     "enableAuth": False,
@@ -212,7 +214,7 @@ create_application_params = {
 
 if os.getenv("ML_RUNTIME_EDITION") != "":
   create_application_params["runtime_id"] = runtime_id
-  create_application_params["addons"] = [1,2]
+  create_application_params["addons"] = [addon_val-1,addon_val]
   create_application_params["kernel"] = ""
 
 new_application_details = cml.create_application(create_application_params)
@@ -276,7 +278,7 @@ create_jobs_params = {"name": "Check Model",
 
 if os.getenv("ML_RUNTIME_EDITION") != None:
   create_jobs_params["runtime_id"] = runtime_id
-  create_jobs_params["addons"] = [1,2]
+  create_jobs_params["addons"] = [addon_val-1,addon_val]
   create_jobs_params["kernel"] = ""
   
 new_job = cml.create_job(create_jobs_params)
