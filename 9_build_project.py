@@ -61,7 +61,7 @@ project_id = project_details["id"]
 #Get the runtime_id
 runtime_id = 14
 for ids in cml.get_runtimes()["runtimes"]:
-  if ids["kernel"] == "Python 3.7" and ids["edition"] == "Standard" and ids["shortVersion"] == "2021.06" and ids["editor"] == "Workbench":
+  if ids["kernel"] == "Python 3.7" and ids["edition"] == "Standard" and ids["shortVersion"] == "2021.09" and ids["editor"] == "Workbench":
     runtime_id = ids["id"]
     
 #Get runtime addon numbers
