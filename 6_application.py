@@ -26,14 +26,14 @@
 # After accepting the dialog, CML will deploy the application then *assign a URL* to
 # the Application using the subdomain you chose.
 #
-# *Note:* This does not requirement the `cdsw-build.sh* file as it doen now follows a
+# *Note:* This does not require the `cdsw-build.sh* file as it does not follow a
 # seperate build process to deploy an application.
 #
 
 # To create an Application using our sample Flask app, perform the following.
 # This is a special step for this particular app:
 #
-# In the deployed Model from step 5, go to *Model* > *Settings* in CML and make a note (i.e. copy) the
+# In the deployed Model from step 5, go to *Model* > *Settings* in CML and make a note of (i.e. copy) the
 # "**Access Key**". eg - `mqc8ypo...pmj056y`
 #
 # While you're there, **disable** the additional Model authentication feature by unticking **Enable Authentication**.
